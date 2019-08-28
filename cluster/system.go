@@ -6,7 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"golang_microservice_assistant/io"
+	"github.com/stlswm/gomicrosys/io"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
