@@ -15,6 +15,9 @@ func out(code int, data interface{}, msg string) Package {
 
 // 成功
 func Success(data interface{}, msg string) Package {
+	if msg == "" {
+		msg = "ok"
+	}
 	return out(OK, data, msg)
 }
 
