@@ -1,4 +1,4 @@
-package io
+package apiio
 
 const OK = 0                // 成功
 const ParamEmpty = 1000     // 参数为空

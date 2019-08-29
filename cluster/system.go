@@ -6,7 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"github.com/stlswm/gomicrosys/io"
+	"github.com/stlswm/gomicrosys/apiio"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
@@ -99,7 +99,7 @@ func GeneratorAuthKey(randomStr string) string {
 }
 
 // 内部系统Json请求
-func InnerJsonReq(alias string, router string, data interface{}) (error, *io.Package) {
+func InnerJsonReq(alias string, router string, data interface{}) (error, *apiio.Package) {
 	err, domain := GetSystemDomain(alias)
 	if err != nil {
 		return err, nil
@@ -121,7 +121,7 @@ func InnerJsonReq(alias string, router string, data interface{}) (error, *io.Pac
 	}
 	defer req.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
-	res := &io.Package{}
+	res := &apiio.Package{}
 	err = json.Unmarshal(body, res)
 	if err != nil {
 		return err, nil
