@@ -116,9 +116,11 @@ func InnerJsonReq(alias string, router string, data interface{}) (error, *apiio.
 		return err, nil
 	}
 	random := GetRandomString(32)
+	timestamp := strconv.FormatInt(time.Now().Unix(), 10)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Cluster-Random", random)
-	req.Header.Set("Cluster-Auth", GeneratorAuthKey(random))
+	req.Header.Set("Cluster-Timestamp", timestamp)
+	req.Header.Set("Cluster-Auth", GeneratorAuthKey(random+"&"+timestamp))
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
