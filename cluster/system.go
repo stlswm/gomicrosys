@@ -8,8 +8,10 @@ import (
 	"errors"
 	"github.com/stlswm/gomicrosys/apiio"
 	"io/ioutil"
+	"math"
 	"math/rand"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -54,8 +56,11 @@ func IsClusterMemberServer(ip string) bool {
 }
 
 // 验证请求是否来原与内部系统
-func IsInnerReq(authStr string, random string) bool {
-	return authStr == GeneratorAuthKey(random)
+func IsInnerReq(authStr string, random string, timestamp int64) bool {
+	if math.Abs(float64(time.Now().Unix()-timestamp)) > 5 {
+		return false
+	}
+	return authStr == GeneratorAuthKey(random+"&"+strconv.FormatInt(timestamp, 10))
 }
 
 // 添加内部系统
