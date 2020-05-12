@@ -1,12 +1,12 @@
 package cluster
 
 import (
-	"../apiio"
 	"bytes"
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"github.com/stlswm/gomicrosys/apiio"
 	"io/ioutil"
 	"math"
 	"math/rand"
