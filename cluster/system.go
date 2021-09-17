@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"github.com/stlswm/gomicrosys/apiio"
 	"io/ioutil"
 	"math"
 	"math/rand"
@@ -24,7 +23,7 @@ func init() {
 	system = make(map[string]string)
 }
 
-// 设置系统秘钥
+// SetClusterKey 设置系统秘钥
 func SetClusterKey(key string) error {
 	if len(key) != 32 {
 		return errors.New("集群秘钥必须是32位字符串")
@@ -33,7 +32,7 @@ func SetClusterKey(key string) error {
 	return nil
 }
 
-// 添加集群服务器
+// AddClusterMemberServer 添加集群服务器
 func AddClusterMemberServer(ip string) error {
 	if ip == "" {
 		return errors.New("请设置正确的ip地址")
@@ -42,7 +41,7 @@ func AddClusterMemberServer(ip string) error {
 	return nil
 }
 
-// 是否是集群成员服务器
+// IsClusterMemberServer 是否是集群成员服务器
 func IsClusterMemberServer(ip string) bool {
 	if ip == "" {
 		return false
@@ -55,7 +54,7 @@ func IsClusterMemberServer(ip string) bool {
 	return false
 }
 
-// 验证请求是否来原与内部系统
+// IsInnerReq 验证请求是否来原与内部系统
 func IsInnerReq(authStr string, random string, timestamp int64) bool {
 	if math.Abs(float64(time.Now().Unix()-timestamp)) > 5 {
 		return false
@@ -63,7 +62,7 @@ func IsInnerReq(authStr string, random string, timestamp int64) bool {
 	return authStr == GeneratorAuthKey(random+"&"+strconv.FormatInt(timestamp, 10))
 }
 
-// 添加内部系统
+// AddServer 添加内部系统
 func AddServer(alias string, domain string) error {
 	if alias == "" {
 		return errors.New("请设置正确的系统别名")
@@ -75,7 +74,7 @@ func AddServer(alias string, domain string) error {
 	return nil
 }
 
-// 获取内部系统域名
+// GetSystemDomain 获取内部系统域名
 func GetSystemDomain(alias string) (error, string) {
 	domain, ok := system[alias]
 	if ok {
@@ -84,7 +83,7 @@ func GetSystemDomain(alias string) (error, string) {
 	return errors.New("系统不存在"), ""
 }
 
-// 随机字符串
+// GetRandomString 随机字符串
 func GetRandomString(length int) string {
 	var result []byte
 	str := "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -96,24 +95,24 @@ func GetRandomString(length int) string {
 	return string(result)
 }
 
-// 生成授权秘钥
+// GeneratorAuthKey 生成授权秘钥
 func GeneratorAuthKey(randomStr string) string {
 	ctx := md5.New()
 	ctx.Write([]byte(clusterKey + randomStr))
 	return hex.EncodeToString(ctx.Sum(nil))
 }
 
-// 内部系统Json请求
-func InnerJsonReq(alias string, router string, data interface{}) (error, *apiio.Package) {
+// InnerJsonReq 内部系统Json请求
+func InnerJsonReq(alias string, router string, request interface{}, response interface{}) error {
 	err, domain := GetSystemDomain(alias)
 	if err != nil {
-		return err, nil
+		return err
 	}
 	router = "/" + strings.TrimLeft(router, "/")
-	dataByte, _ := json.Marshal(data)
+	dataByte, _ := json.Marshal(request)
 	req, err := http.NewRequest("POST", domain+router, bytes.NewBuffer(dataByte))
 	if err != nil {
-		return err, nil
+		return err
 	}
 	random := GetRandomString(32)
 	timestamp := strconv.FormatInt(time.Now().Unix(), 10)
@@ -124,14 +123,14 @@ func InnerJsonReq(alias string, router string, data interface{}) (error, *apiio.
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return err, nil
+		return err
 	}
 	defer req.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
-	res := &apiio.Package{}
-	err = json.Unmarshal(body, res)
+
+	err = json.Unmarshal(body, response)
 	if err != nil {
-		return err, nil
+		return err
 	}
-	return nil, res
+	return nil
 }
