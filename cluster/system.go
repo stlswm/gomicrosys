@@ -127,7 +127,9 @@ func InnerJsonReq(alias string, router string, request interface{}, response int
 	}
 	defer req.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
-
+	if resp.StatusCode != 200 {
+		return errors.New("request not ok status code:" + strconv.Itoa(resp.StatusCode) + ",resp" + string(body))
+	}
 	err = json.Unmarshal(body, response)
 	if err != nil {
 		return err
